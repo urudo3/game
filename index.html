@@ -1424,6 +1424,7 @@
 
       const where = [...d.clauses];
       const params = [...d.params];
+      where.push(`v.title != '[unavailable]'`);
       if (kwCond.clause) {
         where.push(kwCond.clause);
         params.push(...kwCond.params);
@@ -1435,7 +1436,6 @@
       const rows = await d1Query(
         `SELECT v.published_at AS date, s.video_id, v.title, s.timestamp, s.seconds, s.text
        FROM subtitles s JOIN videos v ON s.video_id = v.id
-       WHERE v.title != '[unavailable]'
        ${whereSQL} ORDER BY v.published_at ${order}, s.seconds LIMIT ?`, params);
       return rows.map(r => ({ source: 'Subtitles', date: r.date, videoId: r.video_id, title: r.title, timestamp: r.timestamp, role: '', user: '', text: r.text }));
     }
@@ -1448,6 +1448,7 @@
 
       const where = [...d.clauses];
       const params = [...d.params];
+      where.push(`v.title != '[unavailable]'`);
       if (kwCond.clause) {
         where.push(kwCond.clause);
         params.push(...kwCond.params);
@@ -1459,7 +1460,6 @@
       const rows = await d1Query(
         `SELECT v.published_at AS date, c.video_id, v.title, c.author, c.comment
        FROM comments c JOIN videos v ON c.video_id = v.id
-       WHERE v.title != '[unavailable]'
        ${whereSQL} ORDER BY v.published_at ${order} LIMIT ?`, params);
       return rows.map(r => ({ source: 'Comments', date: r.date, videoId: r.video_id, title: r.title, timestamp: '', role: '', user: r.author, text: r.comment }));
     }
@@ -1472,6 +1472,7 @@
 
       const where = [...d.clauses];
       const params = [...d.params];
+      where.push(`v.title != '[unavailable]'`);
       if (kwCond.clause) {
         where.push(kwCond.clause);
         params.push(...kwCond.params);
@@ -1487,7 +1488,6 @@
       const rows = await d1Query(
         `SELECT v.published_at AS date, lc.video_id, v.title, lc.timestamp, lc.role, lc.author, lc.message, lc.type
        FROM live_chats lc JOIN videos v ON lc.video_id = v.id
-       WHERE v.title != '[unavailable]'
        ${whereSQL} ORDER BY v.published_at ${order}, lc.timestamp LIMIT ?`, params);
       return rows.map(r => ({ source: 'Live Chat', date: r.date, videoId: r.video_id, title: r.title, timestamp: r.timestamp, role: r.role, user: r.author, text: r.message, type: r.type }));
     }
