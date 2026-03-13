@@ -120,15 +120,18 @@ class Obstacle {
 
 // 初期化
 function init() {
-    canvas.width = canvas.parentElement.clientWidth;
-    canvas.height = canvas.parentElement.clientHeight;
+    resizeCanvas();
     
-    window.addEventListener('resize', () => {
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
-    });
+    window.addEventListener('resize', resizeCanvas);
 
     handleInput();
+}
+
+function resizeCanvas() {
+    // 画面サイズに合わせてCanvasをフィットさせる
+    const container = canvas.parentElement;
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
 }
 
 // 入力判定
@@ -139,10 +142,18 @@ function handleInput() {
     window.addEventListener('mousedown', startLifting);
     window.addEventListener('mouseup', stopLifting);
     window.addEventListener('touchstart', (e) => {
-        e.preventDefault();
+        // ダブルタップズームやスクロールを防止
+        if (e.target.tagName !== 'BUTTON') {
+            e.preventDefault();
+        }
         startLifting();
     }, { passive: false });
-    window.addEventListener('touchend', stopLifting);
+    window.addEventListener('touchend', (e) => {
+        if (e.target.tagName !== 'BUTTON') {
+            e.preventDefault();
+        }
+        stopLifting();
+    }, { passive: false });
 
     window.addEventListener('keydown', (e) => {
         if (e.code === 'Space') {
