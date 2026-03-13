@@ -1,0 +1,226 @@
+:root {
+    --bg-color: #0d0d12;
+    --primary-color: #00f2ff;
+    --secondary-color: #ff00ea;
+    --accent-color: #7000ff;
+    --text-color: #ffffff;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --font-main: 'Outfit', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-main);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    max-width: 800px;
+    max-height: 600px;
+    background: linear-gradient(180deg, #0d0d12 0%, #1a1a2e 100%);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5), 0 0 20px rgba(112, 0, 255, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+}
+
+@media (max-width: 800px), (max-height: 600px) {
+    #game-container {
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
+        border: none;
+    }
+    
+    .stat-box {
+        padding: 6px 12px;
+        min-width: 90px;
+    }
+
+    #score, #final-score {
+        font-size: 18px;
+    }
+
+    .screen h1 {
+        font-size: 32px;
+    }
+}
+
+#gameCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#hud {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+}
+
+.stat-box {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    padding: 10px 20px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+}
+
+.label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 4px;
+}
+
+#score, #final-score {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+}
+
+.unit {
+    font-size: 12px;
+    margin-left: 4px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+#life-container {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.heart {
+    width: 12px;
+    height: 12px;
+    background-color: var(--secondary-color);
+    transform: rotate(-45deg);
+    box-shadow: 0 0 10px rgba(255, 0, 234, 0.5);
+}
+
+.heart::before, .heart::after {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background-color: var(--secondary-color);
+    border-radius: 50%;
+}
+
+.heart::before {
+    top: -6px;
+    left: 0;
+}
+
+.heart::after {
+    left: 6px;
+    top: 0;
+}
+
+.heart.lost {
+    background-color: #333;
+    box-shadow: none;
+}
+
+.heart.lost::before, .heart.lost::after {
+    background-color: #333;
+}
+
+#overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(13, 13, 18, 0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    transition: opacity 0.3s ease;
+}
+
+#overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.screen {
+    text-align: center;
+    animation: fadeIn 0.5s ease;
+}
+
+.screen h1 {
+    font-size: 48px;
+    letter-spacing: 8px;
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.screen p {
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+button {
+    background: linear-gradient(45deg, var(--accent-color), var(--secondary-color));
+    color: white;
+    border: none;
+    padding: 12px 32px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 15px rgba(112, 0, 255, 0.4);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(112, 0, 255, 0.6);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.hidden {
+    display: none !important;
+}
