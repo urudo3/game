@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ぴよ座薬タイミング</title>
+<style>
+:root{color-scheme:light dark;--bg:#fdf3e3;--fg:#4a3320;--box-sizing:border-box;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1f1a16;--fg:#f3e6d3}}
+:root[data-theme="dark"]{--bg:#1f1a16;--fg:#f3e6d3}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Hiragino Sans","Yu Gothic",sans-serif;display:flex;flex-direction:column;align-items:center;padding:8px}
+h1{font-size:18px;margin:6px 0}
+canvas{width:100%;max-width:360px;height:auto;border-radius:14px;touch-action:none;user-select:none;-webkit-user-select:none}
+p{font-size:13px;margin:6px 0;text-align:center}
+</style>
+</head>
+<body>
+<h1>🐤 ぴよ座薬タイミング</h1>
+<canvas id="c" width="360" height="520"></canvas>
+<p>長押しでパワーを貯めて、離すと発射！<br>ぴよのおしりの位置にタイミングを合わせよう</p>
+<script>
+const cv=document.getElementById('c'),x=cv.getContext('2d');
+const W=360,H=520,MAX=5;
+let st='ready',round=1,score=0,t=0,g=0,gd=1,shot=null,msg='',fx=[],mood='n',last=performance.now();
+const spd=()=>2.2+round*0.6;
+const bird=()=>{const by=330-Math.abs(Math.sin(t*spd()))*60;return{x:250,y:by,hx:314,hy:by+18}};
+const gy=()=>370-g*100;
+function down(){
+  if(st==='ready'){st='charge';g=0;gd=1}
+  else if(st==='result'){if(round>=MAX){st='over'}else{round++;st='ready';mood='n'}}
+  else if(st==='over'){round=1;score=0;st='ready';mood='n'}
+}
+function up(){
+  if(st==='charge'){st='fly';shot={x:60,y:gy()}}
+}
+cv.addEventListener('pointerdown',e=>{e.preventDefault();down()});
+addEventListener('pointerup',up);
+function burst(px,py){for(let i=0;i<14;i++)fx.push({x:px,y:py,vx:(Math.random()-.5)*260,vy:(Math.random()-.8)*260,l:1})}
+function update(dt){
+  t+=dt;
+  if(st==='charge'){g+=gd*dt*1.1;if(g>=1){g=1;gd=-1}if(g<=0){g=0;gd=1}}
+  if(st==='fly'){
+    shot.x+=720*dt;const b=bird();
+    if(shot.x>=b.hx-6){
+      const d=Math.abs(shot.y-b.hy);
+      if(d<16){const p=d<6;score+=p?150:100;msg=p?'パーフェクト！ぴよっ♡':'入った！ぴよっ♡';mood='h';burst(b.hx,b.hy)}
+      else{msg='はずれ…ぷいっ';mood='m'}
+      st='result';shot=null;
+    }
+  }
+  fx.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=500*dt;p.l-=dt*1.4});
+  fx=fx.filter(p=>p.l>0);
+}
+function swirl(cx,cy){
+  x.fillStyle='#ffb3c7';x.beginPath();x.arc(cx,cy,15,0,7);x.fill();
+  x.strokeStyle='#e8457a';x.lineWidth=2;x.beginPath();
+  for(let a=0;a<4*Math.PI;a+=.2){const r=a*1.1;const px=cx+Math.cos(a)*r,py=cy+Math.sin(a)*r;a?x.lineTo(px,py):x.moveTo(px,py)}
+  x.stroke();
+}
+function drawBird(b){
+  const {x:bx,y:by}=b;
+  x.fillStyle='#f4c20d';
+  for(let i=-1;i<=1;i++){x.beginPath();x.moveTo(bx+50,by-5+i*14);x.lineTo(bx+92,by-28+i*20);x.lineTo(bx+56,by+12+i*14);x.fill()}
+  x.beginPath();x.arc(bx,by,64,0,7);x.fillStyle='#ffd83a';x.fill();
+  x.fillStyle='#f4a300';x.beginPath();x.moveTo(bx-62,by-4);x.lineTo(bx-90,by+6);x.lineTo(bx-62,by+16);x.fill();
+  swirl(bx-34,by+20);
+  x.strokeStyle='#4a3320';x.fillStyle='#4a3320';x.lineWidth=3;
+  if(mood==='h'){x.beginPath();x.arc(bx-24,by-14,7,Math.PI,0);x.stroke();}
+  else{x.beginPath();x.arc(bx-24,by-14,6,0,7);x.fill();
+    if(mood==='m'){x.beginPath();x.moveTo(bx-34,by-30);x.lineTo(bx-14,by-24);x.stroke()}}
+  x.fillStyle='#fff6c9';x.beginPath();x.ellipse(bx+4,by+30,36,24,0,0,7);x.fill();
+  const pulse=4+Math.sin(t*8)*2;
+  x.strokeStyle='#e8457a';x.lineWidth=2;x.fillStyle='#ff8fae';
+  x.beginPath();x.arc(b.hx,b.hy,6,0,7);x.fill();
+  x.beginPath();x.arc(b.hx,b.hy,6+pulse,0,7);x.stroke();
+}
+function capsule(cx,cy){
+  x.save();x.translate(cx,cy);
+  x.fillStyle='#fff';x.strokeStyle='#d98a2b';x.lineWidth=2;
+  x.beginPath();x.moveTo(-14,-6);x.lineTo(6,-6);x.quadraticCurveTo(18,0,6,6);x.lineTo(-14,6);x.closePath();x.fill();x.stroke();
+  x.restore();
+}
+function draw(){
+  x.fillStyle='#ffe9c7';x.fillRect(0,0,W,H);
+  x.fillStyle='#f6d6a4';x.fillRect(0,400,W,120);
+  x.fillStyle='#8a5a33';x.fillRect(120,392,236,50);
+  x.fillStyle='#fff';x.fillRect(124,380,228,22);
+  x.fillStyle='#bde0fe';x.fillRect(124,392,228,14);
+  x.fillStyle='#fff';x.beginPath();x.ellipse(150,378,24,10,0,0,7);x.fill();
+  x.fillStyle='#6b4423';x.fillRect(122,430,12,22);x.fillRect(342,430,12,22);
+  const b=bird();
+  drawBird(b);
+  if(st==='ready'||st==='charge'){
+    const yy=st==='charge'?gy():300;
+    if(st==='charge'){x.strokeStyle='rgba(120,80,40,.35)';x.setLineDash([6,6]);x.beginPath();x.moveTo(60,yy);x.lineTo(300,yy);x.stroke();x.setLineDash([])}
+    x.fillStyle='#ffe0c2';x.beginPath();x.arc(24,yy,16,0,7);x.fill();
+    capsule(52,yy);
+  }
+  if(shot)capsule(shot.x,shot.y);
+  fx.forEach(p=>{x.globalAlpha=Math.max(p.l,0);x.fillStyle='#ff5d8f';x.font='18px sans-serif';x.fillText('★',p.x,p.y)});
+  x.globalAlpha=1;
+  x.fillStyle='#4a3320';x.font='bold 16px sans-serif';x.textAlign='left';
+  x.fillText('ラウンド '+Math.min(round,MAX)+' / '+MAX,12,26);
+  x.textAlign='right';x.fillText('スコア '+score,W-12,26);
+  x.fillStyle='rgba(74,51,32,.2)';x.fillRect(20,480,320,16);
+  x.fillStyle=g>.85?'#e8457a':'#ff9a3c';x.fillRect(20,480,320*(st==='charge'?g:0),16);
+  x.fillStyle='#4a3320';x.font='12px sans-serif';x.textAlign='left';x.fillText('パワー',20,474);
+  x.textAlign='center';x.font='bold 22px sans-serif';
+  if(st==='ready'){x.font='bold 16px sans-serif';x.fillText('長押しでパワーをためる',W/2,70)}
+  if(st==='result'){x.fillText(msg,W/2,80);x.font='14px sans-serif';x.fillText('タップで次へ',W/2,108)}
+  if(st==='over'){
+    x.fillStyle='rgba(255,246,230,.93)';x.fillRect(30,150,300,170);
+    x.fillStyle='#4a3320';x.font='bold 24px sans-serif';x.fillText('おしまい！',W/2,200);
+    x.fillText('スコア '+score,W/2,244);
+    x.font='14px sans-serif';x.fillText('タップでもう一度',W/2,290);
+  }
+}
+function loop(n){const dt=Math.min((n-last)/1000,.05);last=n;update(dt);draw();requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
